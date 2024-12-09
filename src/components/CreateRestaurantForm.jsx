@@ -1,44 +1,63 @@
-import React, { useState } from 'react';
+import { useActionState } from "react";
 
+const initialState = {
+  name: "Pizza Palace",
+  rating: 1,
+  type: "Italian",
+};
+
+const emptyState = {
+  name: "",
+  rating: 0,
+  type: "",
+};
+
+// el
 function CreateRestaurantForm({ handleSubmit }) {
-  const [name, setName] = useState("");
-  const [rating, setRating] = useState(0);
-  const [type, setType] = useState("");
+  const [formState, submitAction, isPending] = useActionState(
+    async (previousState, formData) => {
+      try {
+        const response = await handleSubmit({
+          name: formData.get("name"),
+          rating: formData.get("rating"),
+          type: formData.get("type"),
+        });
 
-  const onSubmit = (e) => {
-    e.preventDefault();
-    handleSubmit({ name, rating, type });
-    setName("");
-    setRating(0);
-    setType("");
-  };
+        if (response.error) {
+          throw new Error("Error creating restaurant", response.error.message);
+        }
+
+        return emptyState;
+      } catch (error) {
+        console.log(error);
+        return { ...emptyState, error: error.message };
+      }
+    },
+    initialState
+  );
 
   return (
     <>
       <h3>Create a new restaurant:</h3>
-      <form onSubmit={onSubmit}>
+      <form action={submitAction}>
         <label htmlFor="">Name</label>
-        <input
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          type="text"
-        />
+        <input defaultValue={formState.name} name="name" type="text" />
         <label htmlFor="">Rating</label>
         <input
-          value={rating}
-          onChange={(e) => setRating(Number(e.target.value))}
+          defaultValue={formState.rating}
+          name="rating"
           type="number"
           min={0}
           max={10}
         />
         <label htmlFor="">Type</label>
-        <input
-          value={type}
-          onChange={(e) => setType(e.target.value)}
-          type="text"
-        />
-        <button type="submit">Create</button>
+        <input defaultValue={formState.type} name="type" type="text" />
+        <button disabled={isPending} type="submit">
+          Create
+        </button>
       </form>
+      <p>{isPending && "Creating restaurant..."}</p>
+      <p className="error">{formState.error && formState.error}</p>
     </>
   );
 }

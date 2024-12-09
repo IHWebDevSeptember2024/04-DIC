@@ -5,6 +5,7 @@ import EditModal from "./components/EditModal";
 import CreateRestaurantForm from "./components/CreateRestaurantForm";
 import RestaurantCard from "./components/RestaurantCard";
 import DeleteModal from "./components/DeleteModal";
+import NewForm from "./components/NewForm";
 
 function App() {
   const [restaurants, setRestaurants] = useState([]);
@@ -32,22 +33,21 @@ function App() {
   async function handleSubmit(newRestaurant) {
     try {
       const response = await supabase
-        .from("restaurants")
+        .from("restaurantss")
         .insert([newRestaurant]);
-      console.log(response);
       getRestaurants();
+      return response;
     } catch (error) {
       console.error(error);
+      return { error };
     }
   }
 
   async function deleteRestaurant(id) {
     try {
-      console.log(id);
-
       const response = await supabase.from("restaurants").delete().eq("id", id);
-      console.log(response);
       getRestaurants();
+      return response;
     } catch (error) {
       console.error(error);
     }
@@ -109,14 +109,11 @@ function App() {
 
   return (
     <>
+      {/* <NewForm /> */}
       <button onClick={toggleCreateForm}>
         {showCreateForm ? "Hide Create Restaurant" : "Show Create Restaurant"}
       </button>
-      {showCreateForm && (
-        <CreateRestaurantForm
-          handleSubmit={handleSubmit}
-        />
-      )}
+      {showCreateForm && <CreateRestaurantForm handleSubmit={handleSubmit} />}
       <label htmlFor="">Filter:</label>
       <select onChange={(e) => setRatingFilter(Number(e.target.value))}>
         <option value={0}>more than 0 ⭐</option>

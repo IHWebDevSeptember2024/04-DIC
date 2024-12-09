@@ -76,6 +76,10 @@ label {
   font-weight: 500;
 }
 
+.error {
+  color: var(--danger-color);
+}
+
 @media (max-width: 600px) {
   body {
     padding: 1rem;
